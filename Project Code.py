@@ -21,8 +21,10 @@ gamma = 1  # X1 -> 0, X2 -> 0
 # Volume
 Omega = 1
 # Number of Reactions to compute
-r_max = 500000
-sparsity = 500
+r_max = 1000000
+sparsity = 100
+num_records = int(r_max/sparsity)
+temp_dependence = 3
 # Propensity functions
 # q = [X1, X1d, D1, C1, X2, X2d, D2, C2]
 r = [
@@ -57,12 +59,12 @@ s = np.matrix([
 
 # Gillespie's direct method (SSA algorithm)
 def ssa(q0, r, s, r_max, sparsity):
-    num_records = r_max/sparsity
+    
     q = q0
-    q_over_time = np.zeros((np.shape(q)[0], int(r_max/sparsity) + 1))
+    q_over_time = np.zeros((np.shape(q)[0], num_records + 1))
     q_over_time[:, 0:1] = q0
     t = 0
-    times = [0] * (int(r_max/sparsity) + 1)
+    times = [0] * (num_records + 1)
     for j in range(1, r_max+1):
         # Pick the reaction that happens first
         reaction_times = [None] * 12
@@ -71,14 +73,6 @@ def ssa(q0, r, s, r_max, sparsity):
                 reaction_times[i] = random.exponential(1/r[i](q))
         dt = min(i for i in reaction_times if i is not None)
         i = reaction_times.index(dt)
-        # prop_sum = sum(i(q) for i in r)
-        # dt = random.exponential(1/prop_sum)
-        # props = [i(q) for i in r]
-        # i = rand.choices(
-        #     population=list(range(12)),
-        #     weights=[p/prop_sum for p in props],
-        #     k=1
-        # )[0]
         # Advance t and q according to the chosen reaction
         t += dt
         q += s[:, i:i+1]
@@ -90,9 +84,11 @@ def ssa(q0, r, s, r_max, sparsity):
         # Cumulatively record t and q
         
         # Temperature increase halfway through
-        # if j == int(r_max/2):
-        #     theta *= 1.5
-        #     print ("Temperature increased")
+        if j == int(r_max/2):
+            global theta
+            global temp_dependence
+            theta *= temp_dependence
+            print ("Temperature increased: t = " + str(t))
         
     return times, q_over_time
 
@@ -131,9 +127,27 @@ def multiplot():
 times, qs = ssa(q0, r, s, r_max, sparsity)
 X1_over_time = qs[0].tolist()
 X2_over_time = qs[4].tolist()
+
+# Quantify "bimodality"
+separation_before = 0
+for i in range(int(num_records/2)):
+    x1 = X1_over_time[i]
+    x2 = X2_over_time[i]
+    separation_before += (x1-x2)**2 / r_max
+
+separation_after = 0
+for i in range(int(num_records/2), num_records):
+    x1 = X1_over_time[i]
+    x2 = X2_over_time[i]
+    separation_after += (x1-x2)**2 / r_max
+
+print ("before: " + str(separation_before))
+print ("after: " + str(separation_after))
 # print (X1_over_time)
 plt.plot(times, X1_over_time, 'r-', label="X1")
 plt.plot(times, X2_over_time, 'b-', label="X2")
 plt.legend()
-plt.title('beta/gamma = ' + str(beta/gamma))
+# plt.title('beta/gamma = ' + str(beta/gamma) + ", temp change => K*=" + str(temp_dependence))
 plt.show()
+
+1128
