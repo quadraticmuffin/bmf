@@ -19,21 +19,21 @@ theta = 25 # C2 -> X1d + D2, C1 -> X2d + D1
 beta = 3   # D1 -> D1 + X1, D2 -> D2 + X2
 gamma = 1  # X1 -> 0, X2 -> 0
 # Volume
-Omega = 1
+V = 1
 # Number of Reactions to compute
 r_max = 1000000
-sparsity = 100
+sparsity = 1000
 num_records = int(r_max/sparsity)
-temp_dependence = 3
+temp_dependence = 2
 # Propensity functions
 # q = [X1, X1d, D1, C1, X2, X2d, D2, C2]
 r = [
-    lambda q: alpha * (q[0]*(q[0]-1)/2) / Omega,
-    lambda q: alpha * (q[4]*(q[4]-1)/2) / Omega,
+    lambda q: alpha * (q[0]*(q[0]-1)/2) / V,
+    lambda q: alpha * (q[4]*(q[4]-1)/2) / V,
     lambda q: delta * q[1],
     lambda q: delta * q[5],
-    lambda q: kappa * q[1] * q[6] / Omega,
-    lambda q: kappa * q[5] * q[2] / Omega,
+    lambda q: kappa * q[1] * q[6] / V,
+    lambda q: kappa * q[5] * q[2] / V,
     lambda q: theta * q[7],
     lambda q: theta * q[3],
     lambda q: beta * q[2],
@@ -149,5 +149,3 @@ plt.plot(times, X2_over_time, 'b-', label="X2")
 plt.legend()
 # plt.title('beta/gamma = ' + str(beta/gamma) + ", temp change => K*=" + str(temp_dependence))
 plt.show()
-
-1128

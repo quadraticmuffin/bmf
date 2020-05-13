@@ -18,17 +18,17 @@ alpha_g = 50 # X1 + Y1 -> G1, X2 + Y2 -> G2
 delta_g = 25 # G1 -> X1 + Y1, G2 -> X2 + Y2
 
 # slow reactions
-beta_x = 3   # D1 -> D1 + X1, D2 -> D2 + X2
-beta_y = 10     # 0 -> Y1, 0 -> Y2
-gamma = 1      # X1 -> 0, X2 -> 0, Y1 -> 0, Y2 -> 0
-omega = 1      # G1 -> 0, G2 -> 0
+beta_x = 2.5     # D1 -> D1 + X1, D2 -> D2 + X2
+beta_y = 1       # 0 -> Y1, 0 -> Y2
+gamma = 0.25        # X1 -> 0, X2 -> 0, Y1 -> 0, Y2 -> 0
+omega = 0.25        # G1 -> Y1, G2 -> Y2
 # Volume
 V = 1
 # Number of Reactions to compute
 r_max = 1000000
-sparsity = 100
+sparsity = 1000
 num_records = int(r_max/sparsity)
-temp_dependence = 3
+temp_dependence = 2
 # Propensity functions
 #       0   1   2   3   4   5    6   7   8   9   10  11
 # q = [X1, X1d, D1, C1, X2, X2d, D2, C2, Y1, G1, Y2, G2]
@@ -77,8 +77,8 @@ s = np.matrix([
     [0, 0, 0, 0, -1, 0, 0, 0, 0, 0, -1, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0],
     [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, -1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 1, -1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1],
     [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0],
@@ -177,13 +177,13 @@ separation_before = 0
 for i in range(int(num_records/2)):
     x1 = X1_over_time[i]
     x2 = X2_over_time[i]
-    separation_before += (x1-x2)**2 / r_max
+    separation_before += (x1-x2)**2 / num_records
 
 separation_after = 0
 for i in range(int(num_records/2), num_records):
     x1 = X1_over_time[i]
     x2 = X2_over_time[i]
-    separation_after += (x1-x2)**2 / r_max
+    separation_after += (x1-x2)**2 / num_records
 
 print ("before: " + str(separation_before))
 print ("after: " + str(separation_after))
